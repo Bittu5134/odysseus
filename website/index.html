@@ -729,17 +729,8 @@
       var hero = canvas.parentElement, ctx = canvas.getContext('2d');
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       var W, H, t = 0, particles = [];
-      var isVisible = true, animId = null;
-
-      // ==========================================
-      // Tunable configuration variables:
-      // ==========================================
-      var TRAIL_FADE_ALPHA = 0.14;       // Controls how long trails stay visible before fading (0.05 = long/dense, 0.14 = crisp & balanced, 0.25 = fast fade)
-      var PARTICLE_COUNT = 220;          // Total number of active flow particles
-      var PARTICLE_ALPHA = 0.22;         // Maximum opacity per particle point
       var COLORS = ['#9cdef2', '#e06c75', '#5fb6cc'];   // cyan, coral, teal
-      var FADE = 'rgba(40,44,52,' + TRAIL_FADE_ALPHA + ')'; // trail fade toward --bg
-
+      var FADE = 'rgba(40,44,52,0.06)';                 // trail fade toward --bg
       function n2(x, y) { var n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return n - Math.floor(n); }
       function noise(x, y) {
         var ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
@@ -753,15 +744,13 @@
         canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         if (!particles.length) {
-          for (var i = 0; i < PARTICLE_COUNT; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, life: Math.random(), c: COLORS[i % COLORS.length] });
+          for (var i = 0; i < 260; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, life: Math.random(), c: COLORS[i % COLORS.length] });
         }
       }
       resize();
       window.addEventListener('resize', resize);
-
       function draw() {
-        if (!isVisible) return;
-        animId = requestAnimationFrame(draw);
+        requestAnimationFrame(draw);
         ctx.fillStyle = FADE; ctx.fillRect(0, 0, W, H);
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
@@ -770,24 +759,9 @@
           p.x += Math.cos(ang) * sp; p.y += Math.sin(ang) * sp; p.life -= 0.001;
           if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) { p.x = Math.random() * W; p.y = Math.random() * H; p.life = 1; }
           ctx.beginPath(); ctx.arc(p.x, p.y, 1.1, 0, Math.PI * 2);
-          ctx.fillStyle = p.c; ctx.globalAlpha = p.life * PARTICLE_ALPHA; ctx.fill();
+          ctx.fillStyle = p.c; ctx.globalAlpha = p.life * 0.18; ctx.fill();
         }
         ctx.globalAlpha = 1; t++;
-      }
-
-      if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            isVisible = e.isIntersecting;
-            if (isVisible && !animId) {
-              draw();
-            } else if (!isVisible && animId) {
-              cancelAnimationFrame(animId);
-              animId = null;
-            }
-          });
-        }, { threshold: 0.05 });
-        io.observe(canvas);
       }
       draw();
     })();
