@@ -323,7 +323,10 @@
   @media (max-width: 760px) {
     .previews { gap: 12px; height: auto; touch-action: pan-y; }
     .preview-row { flex-direction: column; height: auto; gap: 12px; }
-    .preview-panel { height: 190px; flex: none; width: 100%; }
+    .preview-panel {
+      height: 190px; flex: none; width: 100%;
+      transition: height .35s cubic-bezier(.2,.7,.2,1), border-color .25s ease, box-shadow .25s ease;
+    }
     .preview-panel.is-active { height: 280px !important; }
     .preview-row:hover .preview-panel,
     .preview-row:has(.preview-panel.is-active) .preview-panel,
@@ -641,7 +644,7 @@
           </div>
         </div>
         <div class="preview-row">
-          <div class="preview-panel is-active" tabindex="0">
+          <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg><span>[ Documents ]</span></div>
             <video muted loop playsinline preload="metadata"><source src="document.webm" type="video/webm"><source src="document.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Documents</span><span class="desc">A document editor that puts you first — work on what you want, with AI help when you want it.</span></div>
@@ -656,7 +659,7 @@
             <video muted loop playsinline preload="metadata"><source src="gallery.webm" type="video/webm"><source src="gallery.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21"/></svg>Image Gallery</span><span class="desc">Generate, edit, remove backgrounds, and inpaint in your own gallery.</span></div>
           </div>
-          <div class="preview-panel" tabindex="0">
+          <div class="preview-panel is-active" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"/></svg><span>[ Themes ]</span></div>
             <video muted loop playsinline preload="metadata"><source src="theme.webm" type="video/webm"><source src="theme.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"/></svg>Themes</span><span class="desc">Restyle and make it yours — edit your own, or ask the agent to make one.</span></div>
@@ -726,8 +729,17 @@
       var hero = canvas.parentElement, ctx = canvas.getContext('2d');
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       var W, H, t = 0, particles = [];
+      var isVisible = true, animId = null;
+
+      // ==========================================
+      // Tunable configuration variables:
+      // ==========================================
+      var TRAIL_FADE_ALPHA = 0.14;       // Controls how long trails stay visible before fading (0.05 = long/dense, 0.14 = crisp & balanced, 0.25 = fast fade)
+      var PARTICLE_COUNT = 220;          // Total number of active flow particles
+      var PARTICLE_ALPHA = 0.22;         // Maximum opacity per particle point
       var COLORS = ['#9cdef2', '#e06c75', '#5fb6cc'];   // cyan, coral, teal
-      var FADE = 'rgba(40,44,52,0.06)';                 // trail fade toward --bg
+      var FADE = 'rgba(40,44,52,' + TRAIL_FADE_ALPHA + ')'; // trail fade toward --bg
+
       function n2(x, y) { var n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return n - Math.floor(n); }
       function noise(x, y) {
         var ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
@@ -741,13 +753,15 @@
         canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         if (!particles.length) {
-          for (var i = 0; i < 260; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, life: Math.random(), c: COLORS[i % COLORS.length] });
+          for (var i = 0; i < PARTICLE_COUNT; i++) particles.push({ x: Math.random() * W, y: Math.random() * H, life: Math.random(), c: COLORS[i % COLORS.length] });
         }
       }
       resize();
       window.addEventListener('resize', resize);
+
       function draw() {
-        requestAnimationFrame(draw);
+        if (!isVisible) return;
+        animId = requestAnimationFrame(draw);
         ctx.fillStyle = FADE; ctx.fillRect(0, 0, W, H);
         for (var i = 0; i < particles.length; i++) {
           var p = particles[i];
@@ -756,9 +770,24 @@
           p.x += Math.cos(ang) * sp; p.y += Math.sin(ang) * sp; p.life -= 0.001;
           if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) { p.x = Math.random() * W; p.y = Math.random() * H; p.life = 1; }
           ctx.beginPath(); ctx.arc(p.x, p.y, 1.1, 0, Math.PI * 2);
-          ctx.fillStyle = p.c; ctx.globalAlpha = p.life * 0.18; ctx.fill();
+          ctx.fillStyle = p.c; ctx.globalAlpha = p.life * PARTICLE_ALPHA; ctx.fill();
         }
         ctx.globalAlpha = 1; t++;
+      }
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            isVisible = e.isIntersecting;
+            if (isVisible && !animId) {
+              draw();
+            } else if (!isVisible && animId) {
+              cancelAnimationFrame(animId);
+              animId = null;
+            }
+          });
+        }, { threshold: 0.05 });
+        io.observe(canvas);
       }
       draw();
     })();
@@ -809,14 +838,15 @@
     // Previews: hovering/tapping a panel expands it (CSS) and plays its video; the
     // video only becomes visible once it actually starts playing, so missing
     // files just leave the labeled placeholder.
-    // Previews: Each row always maintains one full-size active widget on desktop.
-    // Active panels autoplay their video; hovering, focusing, or clicking switches active panel.
+    // Previews: On desktop, each row maintains one full-size active widget.
+    // On mobile (<=760px), double persistent hover is disabled: only one single panel is active at a time across the entire section.
     (function () {
+      var allPanels = [].slice.call(document.querySelectorAll('.preview-panel'));
       var rows = [].slice.call(document.querySelectorAll('.preview-row'));
-      if (!rows.length) {
-        var fallbackStrip = document.querySelector('.previews');
-        if (fallbackStrip) rows = [fallbackStrip];
-        else return;
+      if (!allPanels.length) return;
+
+      function isMobile() {
+        return window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
       }
 
       function playPanel(p) {
@@ -833,12 +863,24 @@
         if (v) v.pause();
       }
 
-      rows.forEach(function (row) {
-        var panels = [].slice.call(row.querySelectorAll('.preview-panel'));
-        if (!panels.length) return;
-
-        function setActive(targetPanel, shouldPlay) {
-          panels.forEach(function (panel) {
+      function setPanelActive(targetPanel, shouldPlay) {
+        if (isMobile()) {
+          // Mobile: single active panel across entire previews section
+          allPanels.forEach(function (panel) {
+            var on = (panel === targetPanel);
+            panel.classList.toggle('is-active', on);
+            panel.setAttribute('aria-expanded', on ? 'true' : 'false');
+            if (on) {
+              if (shouldPlay !== false) playPanel(panel);
+            } else {
+              pausePanel(panel);
+            }
+          });
+        } else {
+          // Desktop: per-row active panel
+          var parentRow = targetPanel.closest('.preview-row');
+          var rowPanels = parentRow ? [].slice.call(parentRow.querySelectorAll('.preview-panel')) : allPanels;
+          rowPanels.forEach(function (panel) {
             var on = (panel === targetPanel);
             panel.classList.toggle('is-active', on);
             panel.setAttribute('aria-expanded', on ? 'true' : 'false');
@@ -849,33 +891,63 @@
             }
           });
         }
+      }
 
-        panels.forEach(function (p) {
-          var v = p.querySelector('video');
-          if (v) {
-            if (v.readyState >= 2) p.classList.add('has-video');
-            v.addEventListener('loadeddata', function () {
-              p.classList.add('has-video');
-              if (p.classList.contains('is-active')) playPanel(p);
-            });
-            v.addEventListener('canplay', function () {
-              p.classList.add('has-video');
-              if (p.classList.contains('is-active')) playPanel(p);
-            });
-            v.addEventListener('playing', function () { p.classList.add('has-video'); });
-          }
-          p.addEventListener('mouseenter', function () { setActive(p, true); });
-          p.addEventListener('focus', function () { setActive(p, true); });
-          p.addEventListener('click', function () { setActive(p, true); });
-        });
-
-        // Initialize and autoplay first active panel per row
-        var initial = row.querySelector('.preview-panel.is-active') || panels[0];
-        if (initial) {
-          setActive(initial, true);
+      allPanels.forEach(function (p) {
+        var v = p.querySelector('video');
+        if (v) {
+          if (v.readyState >= 2) p.classList.add('has-video');
+          v.addEventListener('loadeddata', function () {
+            p.classList.add('has-video');
+            if (p.classList.contains('is-active')) playPanel(p);
+          });
+          v.addEventListener('canplay', function () {
+            p.classList.add('has-video');
+            if (p.classList.contains('is-active')) playPanel(p);
+          });
+          v.addEventListener('playing', function () { p.classList.add('has-video'); });
         }
+        p.addEventListener('mouseenter', function () { setPanelActive(p, true); });
+        p.addEventListener('focus', function () { setPanelActive(p, true); });
+        p.addEventListener('click', function () { setPanelActive(p, true); });
+      });
 
-        // Swipe navigation per row for mobile / touch
+      function initActiveStates() {
+        if (isMobile()) {
+          // On mobile, ensure only 1 single panel is active across all rows
+          var activePanels = document.querySelectorAll('.preview-panel.is-active');
+          var chosen = activePanels.length ? activePanels[0] : allPanels[0];
+          allPanels.forEach(function (p) {
+            var on = (p === chosen);
+            p.classList.toggle('is-active', on);
+            p.setAttribute('aria-expanded', on ? 'true' : 'false');
+            if (!on) pausePanel(p);
+          });
+          if (chosen) playPanel(chosen);
+        } else {
+          // Desktop: ensure each row has 1 active panel
+          rows.forEach(function (row) {
+            var rowPanels = [].slice.call(row.querySelectorAll('.preview-panel'));
+            if (!rowPanels.length) return;
+            var initial = row.querySelector('.preview-panel.is-active') || rowPanels[0];
+            rowPanels.forEach(function (panel) {
+              var on = (panel === initial);
+              panel.classList.toggle('is-active', on);
+              panel.setAttribute('aria-expanded', on ? 'true' : 'false');
+              if (on) playPanel(panel);
+              else pausePanel(panel);
+            });
+          });
+        }
+      }
+
+      initActiveStates();
+      window.addEventListener('resize', initActiveStates);
+
+      // Swipe navigation per row or overall on touch
+      rows.forEach(function (row) {
+        var panels = [].slice.call(row.querySelectorAll('.preview-panel'));
+        if (!panels.length) return;
         var sx = null, sy = null;
         row.addEventListener('touchstart', function (e) {
           if (!e.touches.length) return;
@@ -887,14 +959,15 @@
           var dx = e.changedTouches[0].clientX - sx;
           var dy = e.changedTouches[0].clientY - sy;
           if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+            var list = isMobile() ? allPanels : panels;
             var currentIdx = -1;
-            for (var i = 0; i < panels.length; i++) {
-              if (panels[i].classList.contains('is-active')) { currentIdx = i; break; }
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].classList.contains('is-active')) { currentIdx = i; break; }
             }
             if (currentIdx < 0) currentIdx = 0;
             var nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
-            if (nextIdx >= 0 && nextIdx < panels.length) {
-              setActive(panels[nextIdx], true);
+            if (nextIdx >= 0 && nextIdx < list.length) {
+              setPanelActive(list[nextIdx], true);
             }
           }
           sx = sy = null;
