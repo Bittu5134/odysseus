@@ -26,18 +26,10 @@
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; scroll-padding-top: 60px; }
-  /* REMOVED: "scroll-snap-type: y proximity"
-     The idea was: >>Each section is a full-viewport "page" with its content centered,
-     so only one shows at a time and the snap is obvious.<<
-
-     PROBLEM: sections easily grow taller than 100vh IRL
-     This cause forced jumps mid-read. It's intrusive UX.
-     The landing-page is not a PowerPoint presentation!
-
-     Preserved: CSS snap-points to avoid destroying code meta-data*/
-  .hero, section {
-    scroll-snap-align: start; min-height: 100vh;
+    .hero, section {
+    min-height: 100vh;
     display: flex; flex-direction: column; justify-content: center;
+    box-sizing: border-box;
   }
   /* Alternate the page backgrounds: slate (the body) ↔ black, to make each
      page boundary obvious. */
@@ -278,15 +270,14 @@
   .previews { display: flex; flex-direction: column; gap: 16px; width: 100%; margin: 36px auto 0; }
   .preview-row { display: flex; align-items: stretch; gap: 14px; height: 275px; width: 100%; }
   .preview-panel {
-    position: relative; flex: 1 1 0; min-width: 0; height: 100%; overflow: hidden;
+    position: relative; flex: 0.62 1 0; min-width: 0; height: 100%; overflow: hidden;
     border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
     background: linear-gradient(180deg, var(--panel), var(--panel2));
     transition: flex-grow .45s cubic-bezier(.2,.7,.2,1), border-color .25s ease, box-shadow .25s ease;
   }
-  .preview-row:hover .preview-panel,
-  .preview-row:has(.preview-panel.is-active) .preview-panel,
-  .preview-row:has(.preview-panel:focus-visible) .preview-panel { flex-grow: 0.62; }
-  .preview-panel:hover, .preview-panel:focus-visible, .preview-panel.is-active {
+  .preview-panel.is-active,
+  .preview-panel:hover,
+  .preview-panel:focus-visible {
     flex-grow: 2.15 !important; border-color: var(--accent);
     box-shadow: 0 12px 32px -8px rgba(0,0,0,0.75), 0 0 24px -2px rgba(224, 108, 117, 0.28);
   }
@@ -629,9 +620,9 @@
       </div>
       <div class="previews">
         <div class="preview-row">
-          <div class="preview-panel" tabindex="0">
+          <div class="preview-panel is-active" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>[ Chat &amp; Agents ]</span></div>
-            <video muted loop playsinline preload="none"><source src="chat.webm" type="video/webm"><source src="chat.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="chat.webm" type="video/webm"><source src="chat.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat &amp; Agents</span><span class="desc">Talk to any local model, or give it tools and let the agent run.</span></div>
           </div>
           <div class="preview-panel" tabindex="0">
@@ -640,34 +631,34 @@
           </div>
           <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg><span>[ Deep Research ]</span></div>
-            <video muted loop playsinline preload="none"><source src="research.webm" type="video/webm"><source src="research.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="research.webm" type="video/webm"><source src="research.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>Deep Research</span><span class="desc">Ask once: it searches, reads sources, and writes back a cited report.</span></div>
           </div>
           <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg><span>[ Compare ]</span></div>
-            <video muted loop playsinline preload="none"><source src="compare.webm" type="video/webm"><source src="compare.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="compare.webm" type="video/webm"><source src="compare.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg>Compare</span><span class="desc">Send one prompt to many models at once and watch them answer side by side.</span></div>
           </div>
         </div>
         <div class="preview-row">
-          <div class="preview-panel" tabindex="0">
+          <div class="preview-panel is-active" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg><span>[ Documents ]</span></div>
-            <video muted loop playsinline preload="none"><source src="document.webm" type="video/webm"><source src="document.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="document.webm" type="video/webm"><source src="document.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>Documents</span><span class="desc">A document editor that puts you first — work on what you want, with AI help when you want it.</span></div>
           </div>
           <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 4-4"/><path d="m3 17 2 2 4-4"/><path d="M13 6h8M13 18h8"/></svg><span>[ Notes &amp; Tasks ]</span></div>
-            <video muted loop playsinline preload="none"><source src="notes.webm" type="video/webm"><source src="notes.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="notes.webm" type="video/webm"><source src="notes.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 2 2 4-4"/><path d="m3 17 2 2 4-4"/><path d="M13 6h8M13 18h8"/></svg>Notes &amp; Tasks</span><span class="desc">Capture notes and to-dos, or let scheduled agents work and brief you after.</span></div>
           </div>
           <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21"/></svg><span>[ Image Gallery ]</span></div>
-            <video muted loop playsinline preload="none"><source src="gallery.webm" type="video/webm"><source src="gallery.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="gallery.webm" type="video/webm"><source src="gallery.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.6-3.6a2 2 0 0 0-2.8 0L6 21"/></svg>Image Gallery</span><span class="desc">Generate, edit, remove backgrounds, and inpaint in your own gallery.</span></div>
           </div>
           <div class="preview-panel" tabindex="0">
             <div class="ph"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"/></svg><span>[ Themes ]</span></div>
-            <video muted loop playsinline preload="none"><source src="theme.webm" type="video/webm"><source src="theme.mp4" type="video/mp4"></video>
+            <video muted loop playsinline preload="metadata"><source src="theme.webm" type="video/webm"><source src="theme.mp4" type="video/mp4"></video>
             <div class="label"><span class="t"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"/></svg>Themes</span><span class="desc">Restyle and make it yours — edit your own, or ask the agent to make one.</span></div>
           </div>
         </div>
@@ -818,79 +809,89 @@
     // Previews: hovering/tapping a panel expands it (CSS) and plays its video; the
     // video only becomes visible once it actually starts playing, so missing
     // files just leave the labeled placeholder.
+    // Previews: Each row always maintains one full-size active widget on desktop.
+    // Hovering, focusing, or clicking any panel in a row selects it and plays its video.
     (function () {
-      var panels = [].slice.call(document.querySelectorAll('.preview-panel'));
-      if (!panels.length) return;
-      var active = -1;
+      var rows = [].slice.call(document.querySelectorAll('.preview-row'));
+      if (!rows.length) {
+        var fallbackStrip = document.querySelector('.previews');
+        if (fallbackStrip) rows = [fallbackStrip];
+        else return;
+      }
+
       function playPanel(p) {
         var v = p.querySelector('video');
         if (!v) return;
         var pr = v.play();
         if (pr && pr.catch) pr.catch(function () {});
       }
+
       function pausePanel(p) {
         var v = p.querySelector('video');
         if (v) v.pause();
       }
-      function setActive(i, shouldPlay) {
-        active = (i + panels.length) % panels.length;
-        panels.forEach(function (panel, k) {
-          var on = k === active;
-          panel.classList.toggle('is-active', on);
-          panel.setAttribute('aria-expanded', on ? 'true' : 'false');
-          if (!on) pausePanel(panel);
-        });
-        if (shouldPlay !== false) playPanel(panels[active]);
-      }
-      panels.forEach(function (p, i) {
-        var v = p.querySelector('video');
-        if (v) {
-          v.addEventListener('playing', function () { p.classList.add('has-video'); });
-          v.addEventListener('pause', function () { /* keep last frame */ });
-        }
-        p.setAttribute('aria-expanded', 'false');
-        p.addEventListener('mouseenter', function () { setActive(i); });
-        p.addEventListener('focus', function () { setActive(i); });
-        p.addEventListener('mouseleave', function () {
-          if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) {
-            p.classList.remove('is-active');
-            p.setAttribute('aria-expanded', 'false');
-            pausePanel(p);
-          }
-        });
-        p.addEventListener('blur', function () { pausePanel(p); });
-        p.addEventListener('click', function () { setActive(i); });
-      });
-      var strip = document.querySelector('.previews');
-      if (strip) {
-        strip.addEventListener('mouseleave', function () {
-          if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) {
-            panels.forEach(function (panel) {
-              panel.classList.remove('is-active');
-              panel.setAttribute('aria-expanded', 'false');
+
+      rows.forEach(function (row) {
+        var panels = [].slice.call(row.querySelectorAll('.preview-panel'));
+        if (!panels.length) return;
+
+        function setActive(targetPanel, shouldPlay) {
+          panels.forEach(function (panel) {
+            var on = (panel === targetPanel);
+            panel.classList.toggle('is-active', on);
+            panel.setAttribute('aria-expanded', on ? 'true' : 'false');
+            if (on) {
+              if (shouldPlay !== false) playPanel(panel);
+            } else {
               pausePanel(panel);
-            });
-            active = -1;
+            }
+          });
+        }
+
+        panels.forEach(function (p) {
+          var v = p.querySelector('video');
+          if (v) {
+            if (v.readyState >= 2) p.classList.add('has-video');
+            v.addEventListener('loadeddata', function () { p.classList.add('has-video'); });
+            v.addEventListener('canplay', function () { p.classList.add('has-video'); });
+            v.addEventListener('playing', function () { p.classList.add('has-video'); });
           }
+          p.addEventListener('mouseenter', function () { setActive(p, true); });
+          p.addEventListener('focus', function () { setActive(p, true); });
+          p.addEventListener('click', function () { setActive(p, true); });
         });
-      }
-      var sx = null, sy = null;
-      if (strip) {
-        strip.addEventListener('touchstart', function (e) {
+
+        // Initialize first active panel per row
+        var initial = row.querySelector('.preview-panel.is-active') || panels[0];
+        if (initial) {
+          setActive(initial, false);
+        }
+
+        // Swipe navigation per row for mobile / touch
+        var sx = null, sy = null;
+        row.addEventListener('touchstart', function (e) {
           if (!e.touches.length) return;
           sx = e.touches[0].clientX;
           sy = e.touches[0].clientY;
         }, { passive: true });
-        strip.addEventListener('touchend', function (e) {
+        row.addEventListener('touchend', function (e) {
           if (sx === null || sy === null || !e.changedTouches.length) return;
           var dx = e.changedTouches[0].clientX - sx;
           var dy = e.changedTouches[0].clientY - sy;
           if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.25) {
-            setActive((active < 0 ? 0 : active) + (dx < 0 ? 1 : -1));
+            var currentIdx = -1;
+            for (var i = 0; i < panels.length; i++) {
+              if (panels[i].classList.contains('is-active')) { currentIdx = i; break; }
+            }
+            if (currentIdx < 0) currentIdx = 0;
+            var nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
+            if (nextIdx >= 0 && nextIdx < panels.length) {
+              setActive(panels[nextIdx], true);
+            }
           }
           sx = sy = null;
         }, { passive: true });
-      }
+      });
     })();
 
     // Domino reveal: fade/slide each section in as it scrolls into view.
